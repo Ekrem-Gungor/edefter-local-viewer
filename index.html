@@ -10,31 +10,33 @@
     <title>e-Defter Yerel Görüntüleyici</title>
   </head>
   <body>
-    <header class="site-header">
-      <div class="site-header__content">
+    <header class="app-header">
+      <div class="app-header__inner">
         <div>
-          <p class="eyebrow">Çevrimdışı XML aracı</p>
+          <p class="app-header__context">e-Dönüşüm yardımcı aracı</p>
           <h1>e-Defter Yerel Görüntüleyici</h1>
         </div>
-        <span class="privacy-badge">Veriler cihazınızdan çıkmaz</span>
+        <span class="local-processing-badge">
+          <span aria-hidden="true"></span>
+          Veriler cihazınızdan çıkmaz
+        </span>
       </div>
     </header>
 
     <main class="page-shell">
-      <section class="upload-card" aria-labelledby="upload-title">
-        <div>
-          <p class="eyebrow">Yerel dosya</p>
-          <h2 id="upload-title">Berat XML dosyanızı seçin</h2>
-          <p class="supporting-text">
-            Yevmiye ve büyük defter beratları desteklenir. Dosya yalnızca bu
-            tarayıcı sekmesinde işlenir.
-          </p>
+      <section class="file-panel" aria-labelledby="file-panel-title">
+        <div class="file-panel__intro">
+          <div>
+            <p class="section-kicker">Yerel dosya inceleme</p>
+            <h2 id="file-panel-title">Berat XML dosyası</h2>
+            <p>
+              Yevmiye veya büyük defter beratını seçin. Dosya bu tarayıcı
+              sekmesinde işlenir ve herhangi bir sunucuya gönderilmez.
+            </p>
+          </div>
+          <div class="file-panel__limit">Azami dosya boyutu: 10 MiB</div>
         </div>
 
-        <label class="file-picker" for="xml-file">
-          <span>XML dosyası seç</span>
-          <small>En fazla 10 MiB</small>
-        </label>
         <input
           id="xml-file"
           class="visually-hidden"
@@ -42,48 +44,157 @@
           accept=".xml,text/xml,application/xml"
         />
 
-        <p id="status" class="status" data-tone="neutral" aria-live="polite">
-          Henüz bir dosya seçilmedi.
-        </p>
-      </section>
+        <button id="drop-zone" class="drop-zone" type="button">
+          <span class="drop-zone__icon" aria-hidden="true">XML</span>
+          <span class="drop-zone__title">Dosya seçin veya buraya bırakın</span>
+          <span class="drop-zone__description">
+            Yalnızca .xml uzantılı e-Defter beratları
+          </span>
+        </button>
 
-      <section id="summary" class="summary" aria-labelledby="summary-title" hidden>
-        <div class="summary__heading">
-          <div>
-            <p class="eyebrow">Belge özeti</p>
-            <h2 id="summary-title">Okunan bilgiler</h2>
-          </div>
-          <span id="selected-file" class="file-name"></span>
-        </div>
-
-        <dl class="summary-grid">
-          <div>
-            <dt>Defter türü</dt>
-            <dd id="document-type">-</dd>
-          </div>
-          <div>
-            <dt>Mükellef</dt>
-            <dd id="taxpayer-title">-</dd>
-          </div>
-          <div>
-            <dt>Dönem</dt>
-            <dd id="document-period">-</dd>
-          </div>
-          <div>
-            <dt>Hesap sayısı</dt>
-            <dd id="account-count">-</dd>
-          </div>
-        </dl>
-
-        <div class="notice" role="note">
-          <strong>İmza doğrulama kapsamı</strong>
-          <p id="signature-notice">
-            İmza alanları yalnızca XML içeriğinden okunur; kriptografik
-            doğrulama yapılmaz.
+        <div class="file-panel__footer">
+          <p id="status" class="status" data-tone="neutral" aria-live="polite">
+            Henüz bir dosya seçilmedi.
           </p>
+          <div class="toolbar" aria-label="Belge işlemleri">
+            <button id="select-file" class="button button--primary" type="button">
+              Dosya seç
+            </button>
+            <button id="reset-viewer" class="button" type="button" disabled>
+              Temizle
+            </button>
+            <button id="print-report" class="button" type="button" disabled>
+              Yazdır
+            </button>
+          </div>
         </div>
       </section>
+
+      <article id="report" class="report" aria-labelledby="report-title" hidden>
+        <header class="report-header">
+          <div>
+            <p class="section-kicker">Belge inceleme sonucu</p>
+            <h2 id="report-title">e-Defter berat bilgileri</h2>
+            <p id="selected-file" class="selected-file"></p>
+          </div>
+          <span id="document-type-badge" class="document-type-badge"></span>
+        </header>
+
+        <section class="summary-section" aria-label="Belge özeti">
+          <dl class="summary-grid">
+            <div>
+              <dt>Defter türü</dt>
+              <dd id="summary-document-type">-</dd>
+            </div>
+            <div>
+              <dt>Dönem</dt>
+              <dd id="summary-period">-</dd>
+            </div>
+            <div>
+              <dt>Tekil numara</dt>
+              <dd id="summary-unique-id">-</dd>
+            </div>
+            <div>
+              <dt>Yevmiye maddesi</dt>
+              <dd id="summary-entry-count">-</dd>
+            </div>
+          </dl>
+        </section>
+
+        <div class="information-grid">
+          <section class="report-section" aria-labelledby="taxpayer-title">
+            <div class="section-heading">
+              <h3 id="taxpayer-title">Mükellef bilgileri</h3>
+            </div>
+            <table class="detail-table">
+              <tbody id="taxpayer-details"></tbody>
+            </table>
+          </section>
+
+          <section class="report-section" aria-labelledby="accountant-title">
+            <div class="section-heading">
+              <h3 id="accountant-title">Meslek mensubu bilgileri</h3>
+            </div>
+            <table class="detail-table">
+              <tbody id="accountant-details"></tbody>
+            </table>
+          </section>
+        </div>
+
+        <section class="report-section" aria-labelledby="document-title">
+          <div class="section-heading">
+            <h3 id="document-title">Doküman bilgileri</h3>
+          </div>
+          <table class="detail-table detail-table--wide">
+            <tbody id="document-details"></tbody>
+          </table>
+        </section>
+
+        <section class="report-section" aria-labelledby="accounts-title">
+          <div class="section-heading section-heading--split">
+            <h3 id="accounts-title">Hesap toplamları</h3>
+            <span id="account-summary" class="section-meta"></span>
+          </div>
+          <div class="table-scroll">
+            <table class="accounts-table">
+              <thead>
+                <tr>
+                  <th scope="col">Hesap kodu</th>
+                  <th scope="col">Hesap adı</th>
+                  <th scope="col" class="numeric-cell">Borç</th>
+                  <th scope="col" class="numeric-cell">Alacak</th>
+                </tr>
+              </thead>
+              <tbody id="account-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="signature-grid">
+          <section class="report-section" aria-labelledby="primary-signature-title">
+            <div class="section-heading section-heading--split">
+              <h3 id="primary-signature-title">Belge imza bilgileri</h3>
+              <span id="primary-signature-state" class="state-badge"></span>
+            </div>
+            <table class="detail-table">
+              <tbody id="primary-signature-details"></tbody>
+            </table>
+            <details class="signature-value">
+              <summary>İmza değerini göster</summary>
+              <pre id="primary-signature-value"></pre>
+            </details>
+          </section>
+
+          <section class="report-section" aria-labelledby="counter-signature-title">
+            <div class="section-heading section-heading--split">
+              <h3 id="counter-signature-title">Karşı imza bilgileri</h3>
+              <span id="counter-signature-state" class="state-badge"></span>
+            </div>
+            <table class="detail-table">
+              <tbody id="counter-signature-details"></tbody>
+            </table>
+            <details class="signature-value">
+              <summary>Karşı imza değerini göster</summary>
+              <pre id="counter-signature-value"></pre>
+            </details>
+          </section>
+        </div>
+
+        <aside class="verification-notice" aria-labelledby="verification-title">
+          <h3 id="verification-title">Doğrulama kapsamı</h3>
+          <p id="verification-message"></p>
+          <p>
+            Bu araç elektronik imzayı, sertifika zincirini, belge bütünlüğünü
+            veya hukuki geçerliliği doğrulamaz. Gösterilen bilgiler yalnızca
+            seçilen XML dosyasından okunmuştur.
+          </p>
+        </aside>
+      </article>
     </main>
+
+    <footer class="app-footer">
+      <p>e-Defter Yerel Görüntüleyici · Çevrimdışı kullanım</p>
+    </footer>
 
     <script type="module" src="/src/main.js"></script>
   </body>

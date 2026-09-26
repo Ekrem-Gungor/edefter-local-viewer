@@ -1,20 +1,21 @@
 import "./styles.css";
 import { extractELedgerData } from "./parser/extractELedgerData.js";
 import {
+  clearELedgerReport,
+  renderELedgerReport,
+} from "./ui/renderELedgerReport.js";
+import {
   DEFAULT_MAX_XML_BYTES,
   parseELedgerXml,
 } from "./xml/parseELedgerXml.js";
 
 const elements = Object.freeze({
   fileInput: document.querySelector("#xml-file"),
+  dropZone: document.querySelector("#drop-zone"),
+  selectFile: document.querySelector("#select-file"),
+  resetViewer: document.querySelector("#reset-viewer"),
+  printReport: document.querySelector("#print-report"),
   status: document.querySelector("#status"),
-  summary: document.querySelector("#summary"),
-  selectedFile: document.querySelector("#selected-file"),
-  documentType: document.querySelector("#document-type"),
-  taxpayerTitle: document.querySelector("#taxpayer-title"),
-  documentPeriod: document.querySelector("#document-period"),
-  accountCount: document.querySelector("#account-count"),
-  signatureNotice: document.querySelector("#signature-notice"),
 });
 
 function setStatus(message, tone = "neutral") {
@@ -22,59 +23,43 @@ function setStatus(message, tone = "neutral") {
   elements.status.dataset.tone = tone;
 }
 
-function formatPeriod(start, end) {
-  if (!start && !end) {
-    return "-";
-  }
-
-  return `${start || "-"} – ${end || "-"}`;
+function setBusy(isBusy) {
+  elements.fileInput.disabled = isBusy;
+  elements.dropZone.disabled = isBusy;
+  elements.selectFile.disabled = isBusy;
 }
 
-function getSignatureNotice(signatures) {
-  if (!signatures.counterSignature.present) {
-    return "XML içinde karşı imza bilgisi bulunamadı. Kriptografik doğrulama yapılmadı.";
-  }
-
-  if (signatures.counterSignature.claimedAuthority === "GIB") {
-    return "XML içinde GİB adına düzenlenmiş karşı imza bilgisi bulundu. Bu ifade kriptografik veya resmi doğrulama sonucu değildir.";
-  }
-
-  return "XML içinde karşı imza bilgisi bulundu. İmzanın sahibi ve geçerliliği doğrulanmadı.";
+function setReportActionsEnabled(isEnabled) {
+  elements.resetViewer.disabled = !isEnabled;
+  elements.printReport.disabled = !isEnabled;
 }
 
-function renderSummary(file, data) {
-  elements.selectedFile.textContent = file.name;
-  elements.documentType.textContent = data.documentTypeLabel;
-  elements.taxpayerTitle.textContent = data.taxpayer.title || "-";
-  elements.documentPeriod.textContent = formatPeriod(
-    data.document.periodStart,
-    data.document.periodEnd,
-  );
-  elements.accountCount.textContent = String(data.accounts.length);
-  elements.signatureNotice.textContent = getSignatureNotice(data.signatures);
-  elements.summary.hidden = false;
+function isXmlFile(file) {
+  return file.name.toLocaleLowerCase("tr-TR").endsWith(".xml");
 }
 
-function clearSummary() {
-  elements.summary.hidden = true;
+function resetViewer() {
+  elements.fileInput.value = "";
+  clearELedgerReport();
+  setReportActionsEnabled(false);
+  setStatus("Henüz bir dosya seçilmedi.");
 }
 
-async function handleFileSelection(event) {
-  const [file] = event.target.files;
+async function processFile(file) {
+  clearELedgerReport();
+  setReportActionsEnabled(false);
 
-  if (!file) {
-    clearSummary();
-    setStatus("Henüz bir dosya seçilmedi.");
+  if (!isXmlFile(file)) {
+    setStatus("Yalnızca .xml uzantılı dosyalar desteklenir.", "error");
     return;
   }
-
-  clearSummary();
 
   if (file.size > DEFAULT_MAX_XML_BYTES) {
     setStatus("XML dosyası izin verilen 10 MiB sınırını aşıyor.", "error");
     return;
   }
 
+  setBusy(true);
   setStatus("XML dosyası cihazınızda işleniyor…", "progress");
 
   try {
@@ -82,7 +67,8 @@ async function handleFileSelection(event) {
     const parsed = parseELedgerXml(xmlSource);
     const data = extractELedgerData(parsed.document);
 
-    renderSummary(file, data);
+    renderELedgerReport(file.name, data);
+    setReportActionsEnabled(true);
     setStatus("Dosya başarıyla yerel olarak işlendi.", "success");
   } catch (error) {
     const message =
@@ -91,7 +77,44 @@ async function handleFileSelection(event) {
         : "XML dosyası işlenirken beklenmeyen bir hata oluştu.";
 
     setStatus(message, "error");
+  } finally {
+    setBusy(false);
   }
 }
 
-elements.fileInput.addEventListener("change", handleFileSelection);
+function openFilePicker() {
+  elements.fileInput.click();
+}
+
+elements.fileInput.addEventListener("change", (event) => {
+  const [file] = event.target.files;
+
+  if (file) {
+    void processFile(file);
+  }
+});
+
+elements.dropZone.addEventListener("click", openFilePicker);
+elements.selectFile.addEventListener("click", openFilePicker);
+elements.resetViewer.addEventListener("click", resetViewer);
+elements.printReport.addEventListener("click", () => window.print());
+
+elements.dropZone.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  elements.dropZone.classList.add("drop-zone--active");
+});
+
+elements.dropZone.addEventListener("dragleave", () => {
+  elements.dropZone.classList.remove("drop-zone--active");
+});
+
+elements.dropZone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  elements.dropZone.classList.remove("drop-zone--active");
+
+  const [file] = event.dataTransfer.files;
+
+  if (file) {
+    void processFile(file);
+  }
+});
