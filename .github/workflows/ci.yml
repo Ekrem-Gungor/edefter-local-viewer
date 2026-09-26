@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Build offline release
+        run: npm run build
+
+      - name: Validate release artifact
+        shell: bash
+        run: |
+          test -f dist/EDEFTER_GORUNTULE.html
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 1
+
+      - name: Upload offline viewer
+        uses: actions/upload-artifact@v6
+        with:
+          name: edefter-local-viewer-${{ github.sha }}
+          path: dist/EDEFTER_GORUNTULE.html
+          if-no-files-found: error
+          retention-days: 14
