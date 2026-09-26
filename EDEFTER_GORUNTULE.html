@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>e-Defter Berat Görüntüleyici</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f7f9;color:#1f2937}
+.top{background:#fff;color:#1f2937;padding:22px 24px;border-bottom:1px solid #d9dee5}.top h1{margin:0;font-size:21px;font-weight:700}.top p{display:none}
+.wrap{max-width:1120px;margin:28px auto;padding:0 18px}
+.card{background:#fff;border:1px solid #d9dee5;border-radius:6px;box-shadow:0 1px 3px #00000008;margin-bottom:16px;padding:18px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:190px;border:1px solid #cfd6df;border-radius:6px;padding:28px;text-align:center;background:#fff;cursor:pointer}
+.drop:hover{background:#fafbfc}.drop strong{display:block;font-size:17px;margin-bottom:7px;color:#26364a}.drop span{display:none}
+input[type=file]{display:none}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:5px;padding:10px 18px;font-weight:700;cursor:pointer}
+.primary{background:#1f3b5b;color:#fff}.secondary{background:#eef1f4;color:#26313d}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h2{font-size:15px;margin:0 0 12px;border-bottom:1px solid #e1e5ea;padding-bottom:9px;color:#26364a}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 10px;border-bottom:1px solid #e9edf1;vertical-align:top}th{text-align:right;width:190px;color:#4c5662}td{font-weight:600}
+.badge{display:inline-block;background:#eef2f6;color:#34495e;padding:5px 9px;border-radius:4px;font-size:12px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#f8f9fa;border:1px solid #e1e5ea;border-radius:5px;padding:12px}.stat small{display:block;color:#707985;margin-bottom:5px}.stat b{font-size:15px}
+.pre{white-space:pre-wrap;word-break:break-all;font:12px Consolas,monospace;background:#fafafa;border:1px solid #e1e5e9;border-radius:8px;padding:12px;max-height:260px;overflow:auto}
+#app{display:none}.err{color:#b42318;background:#fff1f0;border:1px solid #f2c7c4;padding:12px;border-radius:8px;margin-top:12px;display:none}
+@media(max-width:800px){.grid,.summary{grid-template-columns:1fr}.wrap{margin:12px auto}}
+@media print{.top,.drop,.actions{display:none!important}body{background:#fff}.wrap{margin:0;max-width:none}.card{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="top"><div style="max-width:1120px;margin:0 auto"><h1>e-Defter Berat Görüntüleyici</h1></div></div>
+<div class="wrap">
+  <div class="card">
+    <label class="drop" for="file"><strong>XML DOSYASI SEÇ</strong></label>
+    <input id="file" type="file" accept=".xml,text/xml,application/xml">
+    <div class="actions"><button class="primary" onclick="document.getElementById('file').click()">XML SEÇ</button><button class="secondary" onclick="window.print()">YAZDIR</button></div>
+    <div id="err" class="err"></div>
+  </div>
+  <div id="app">
+    <div class="card"><div class="summary" id="summary"></div></div>
+    <div class="grid">
+      <div class="card"><h2>MÜKELLEF BİLGİLERİ</h2><table id="taxpayer"></table></div>
+      <div class="card"><h2>MESLEK MENSUBU BİLGİLERİ</h2><table id="accountant"></table></div>
+    </div>
+    <div class="card"><h2>DOKÜMAN BİLGİLERİ</h2><table id="document"></table></div>
+    <div class="card"><h2>VERGİ DETAYI</h2><div style="overflow:auto"><table id="tax"></table></div></div>
+    <div class="card"><h2>BERAT'A KONU OLAN DOKÜMANIN İMZA DEĞERİ</h2><div class="pre" id="sig"></div></div>
+    <div class="card"><h2>GİB ONAY BİLGİLERİ</h2><div class="pre" id="gib"></div></div>
+  </div>
+</div>
+<script>
+const NS={
+ e:"http://www.edefter.gov.tr", x:"http://www.xbrl.org/2003/instance",
+ c:"http://www.xbrl.org/int/gl/cor/2006-10-25", b:"http://www.xbrl.org/int/gl/bus/2006-10-25",
+ ds:"http://www.w3.org/2000/09/xmldsig#", xa:"http://uri.etsi.org/01903/v1.3.2#"
+};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function one(root,path){return root.getElementsByTagNameNS(path[0],path[1])[0]?.textContent?.trim()||""}
+function all(root,ns,tag){return [...root.getElementsByTagNameNS(ns,tag)]}
+function tr(k,v){return `<tr><th>${esc(k)}</th><td>${esc(v||"-")}</td></tr>`}
+function fmtDate(s){if(!s)return "";let m=s.match(/^(\d{4})-(\d\d)-(\d\d)/);return m?`${m[3]} / ${m[2]} / ${m[1]}`:s}
+function num(s){let n=Number(s);return Number.isFinite(n)?n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}):s}
+function render(xml,name){
+  const parser=new DOMParser(), doc=parser.parseFromString(xml,"application/xml");
+  if(doc.querySelector("parsererror")) throw Error("XML dosyası okunamadı veya geçersiz.");
+  const root=doc.documentElement, entries=one(root,[NS.c,"entriesType"]);
+  const type=entries==="ledger"?"Büyük Defter":entries==="journal"?"Yevmiye Defteri":"Belge";
+  const ident=all(root,NS.b,"organizationIdentifiers");
+  const orgDesc=d=>ident.find(x=>one(x,[NS.b,"organizationDescription"])===d);
+  const orgId=d=>orgDesc(d)?one(orgDesc(d),[NS.b,"organizationIdentifier"]):"";
+  const vkn=one(root,[NS.x,"identifier"]);
+  const context=[...root.getElementsByTagNameNS(NS.x,"context")][0];
+  const idNodes=context?[...context.getElementsByTagNameNS(NS.c,"uniqueID")]:[];
+  const ettn=idNodes[0]?.textContent.trim()||"";
+  const docInfo=[...root.getElementsByTagNameNS(NS.c,"documentInfo")][0];
+  const start=one(docInfo,[NS.c,"periodCoveredStart"]), end=one(docInfo,[NS.c,"periodCoveredEnd"]);
+  const creation=one(docInfo,[NS.c,"creationDate"]), uid=one(docInfo,[NS.c,"uniqueID"]);
+  const creator=one(docInfo,[NS.b,"creator"]), source=one(docInfo,[NS.b,"sourceApplication"]);
+  const comment=one(docInfo,[NS.c,"entriesComment"]);
+  const phone=one(root,[NS.b,"phoneNumber"]), email=one(root,[NS.b,"entityEmailAddress"]);
+  const fax=one(root,[NS.b,"entityFaxNumber"]);
+  const accountant=all(root,NS.b,"accountantInformation")[0];
+  const accName=accountant?one(accountant,[NS.b,"accountantName"]):"";
+  const accPhone=accountant?one(accountant,[NS.b,"accountantContactPhoneNumber"]):"";
+  const accEmail=accountant?one(accountant,[NS.b,"accountantContactEmailAddress"]):"";
+  const accFax=accountant?one(accountant,[NS.b,"accountantContactFaxNumber"]):"";
+  const contract=accountant?one(accountant,[NS.b,"accountantEngagementTypeDescription"]):"";
+  const nEntries=one(root,[NS.b,"numberOfEntries"]);
+  const fyS=one(root,[NS.b,"fiscalYearStart"]), fyE=one(root,[NS.b,"fiscalYearEnd"]);
+  $("#summary").innerHTML=[
+    ["DEFTER",type],["DÖNEM",`${fmtDate(start)} - ${fmtDate(end)}`],["TEKİL NO",uid],["YEVMİYE MADDESİ",nEntries||"-"]
+  ].map(x=>`<div class="stat"><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join("");
+  $("#taxpayer").innerHTML=tr(vkn&&orgId("Kurum Unvanı")?"VKN":"TCKN",vkn)+tr("UNVAN",orgId("Kurum Unvanı")||orgId("Adı Soyadı"))+tr("ŞUBE",orgId("Şube Adı"))+tr("TELEFON",phone)+tr("FAX",fax)+tr("E-POSTA",email);
+  $("#accountant").innerHTML=tr("UNVAN",accName)+tr("TELEFON",accPhone)+tr("FAX",accFax)+tr("E-POSTA",accEmail)+tr("SÖZLEŞME NO",contract);
+  $("#document").innerHTML=tr("DOKÜMAN TİPİ",type)+tr("OLUŞTURAN",creator)+tr("DÖNEMİ",`${fmtDate(start)} - ${fmtDate(end)}`)+tr("TEKİL NO",uid)+tr("OLUŞTURMA TARİHİ",fmtDate(creation))+tr("KAYNAK UYGULAMA",source)+tr("HESAP DÖNEMİ",`${fmtDate(fyS)} - ${fmtDate(fyE)}`)+tr("ETTN",ettn)+tr("AÇIKLAMA",comment);
+  const details=all(root,NS.c,"entryDetail").filter(d=>one(d,[NS.c,"xbrlInclude"])==="period_change");
+  const rows={};
+  details.forEach(d=>{
+    const code=one(d,[NS.c,"accountMainID"])||one(d,[NS.c,"accountMainDescription"])?"":"";
+    const acct=d.getElementsByTagNameNS(NS.c,"account")[0];
+    const c=acct?one(acct,[NS.c,"accountMainID"]):"";
+    const desc=acct?one(acct,[NS.c,"accountMainDescription"]):"";
+    if(!c)return;
+    rows[c]??={desc,debit:0,credit:0};
+    const a=Number(one(d,[NS.c,"amount"]))||0, dc=one(d,[NS.c,"debitCreditCode"]);
+    if(dc==="D")rows[c].debit+=a; else if(dc==="C")rows[c].credit+=a;
+  });
+  const taxRows=Object.entries(rows);
+  $("#tax").innerHTML=`<tr><th style="text-align:left">HESAP KODU</th><th style="text-align:left">HESAP ADI</th><th style="text-align:right">BORÇ</th><th style="text-align:right">ALACAK</th></tr>`+
+    (taxRows.length?taxRows.map(([c,r])=>`<tr><td>${esc(c)}</td><td>${esc(r.desc)}</td><td style="text-align:right">${num(r.debit)}</td><td style="text-align:right">${num(r.credit)}</td></tr>`).join(""):`<tr><td colspan="4">Vergi detay kaydı bulunamadı.</td></tr>`);
+  // İMZA VE GİB ONAY BİLGİLERİ
+  // Berat XML'inde GİB onayı xades:CounterSignature altında yer alır.
+  // Bu bölüm özellikle CounterSignature içindeki ds:Signature düğümünü okur.
+  const signatureValues = all(root,NS.ds,"SignatureValue")
+    .map(x=>x.textContent.trim()).filter(Boolean);
+  const signatures = all(root,NS.ds,"Signature");
+
+  let mainSig = "", mainSubject = "", mainTime = "";
+  let gibSig = "", gibSubject = "", gibTime = "", gibIssuer = "", gibSerial = "";
+  let gibFound = false;
+
+  // Ana imzayı GİB karşı imzasından ayır.
+  signatures.forEach(sig=>{
+    const subject = one(sig,[NS.ds,"X509SubjectName"]);
+    const value = one(sig,[NS.ds,"SignatureValue"]);
+    const time = one(sig,[NS.xa,"SigningTime"]);
+    if (!/GELİR İDARESİ BAŞKANLIĞI/i.test(subject) && !mainSig && value) {
+      mainSig=value; mainSubject=subject; mainTime=time;
+    }
+  });
+
+  // Bazı Berat yapılarında ana SignatureValue ayrıca bulunabilir.
+  if (!mainSig && signatureValues.length) mainSig=signatureValues[0];
+
+  // GİB ONAYI: CounterSignature içindeki imzayı doğrudan bul.
+  const counterNodes = root.getElementsByTagNameNS(NS.xa,"CounterSignature");
+  for (const cs of counterNodes) {
+    const nested = cs.getElementsByTagNameNS(NS.ds,"Signature")[0];
+    if (!nested) continue;
+
+    const subject = one(nested,[NS.ds,"X509SubjectName"]);
+    const value = one(nested,[NS.ds,"SignatureValue"]);
+    const time = one(nested,[NS.xa,"SigningTime"]);
+    const issuer = one(nested,[NS.xa,"X509IssuerName"]);
+    const serial = one(nested,[NS.xa,"X509SerialNumber"]);
+
+    // X509IssuerName / X509SerialNumber çoğu Berat'ta
+    // xades:IssuerSerial altında bulunur; doğrudan Signature altında da arıyoruz.
+    const issuerNode = nested.getElementsByTagNameNS(NS.ds,"X509IssuerName")[0];
+    const serialNode = nested.getElementsByTagNameNS(NS.ds,"X509SerialNumber")[0];
+
+    gibSig = value;
+    gibSubject = subject;
+    gibTime = time;
+    gibIssuer = issuerNode?.textContent?.trim() || issuer;
+    gibSerial = serialNode?.textContent?.trim() || serial;
+    gibFound = !!(gibSig || gibSubject);
+    break;
+  }
+
+  const mainSigLines =
+    (mainSubject ? "İMZALAYAN: " + mainSubject + "\n" : "") +
+    (mainTime ? "İMZA ZAMANI: " + fmtDate(mainTime) + " " + mainTime.substring(11,19) + " UTC\n" : "") +
+    (mainSig ? "\nİMZA DEĞERİ:\n" + mainSig : "İmza değeri bulunamadı.");
+
+  $("#sig").textContent = mainSigLines;
+
+  if (gibFound) {
+    $("#gib").textContent =
+      "GİB ONAY DURUMU: MEVCUT\n\n" +
+      (gibSubject ? "ONAYLAYAN: " + gibSubject + "\n" : "") +
+      (gibTime ? "GİB ONAY ZAMANI: " + fmtDate(gibTime) + " " + gibTime.substring(11,19) + "\n" : "") +
+      "İMZA ALGORİTMASI: RSA-SHA256\n" +
+      (gibIssuer ? "SERTİFİKA VEREN: " + gibIssuer + "\n" : "") +
+      (gibSerial ? "SERTİFİKA SERİ NO: " + gibSerial + "\n" : "") +
+      "\nGİB KARŞI İMZA DEĞERİ:\n" + gibSig;
+  } else {
+    $("#gib").textContent = "GİB ONAY DURUMU: XML içinde GİB karşı imzası bulunamadı.";
+  }
+  $("#app").style.display="block";
+  document.title=`${type} - ${name}`;
+}
+$("#file").addEventListener("change",e=>{
+ const f=e.target.files[0]; if(!f)return;
+ const r=new FileReader(); r.onload=()=>{try{$("#err").style.display="none";render(r.result,f.name)}catch(x){$("#err").textContent=x.message;$("#err").style.display="block"}}; r.readAsText(f,"UTF-8");
+});
+</script>
+</body></html>
