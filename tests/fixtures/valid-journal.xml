@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl
+  xmlns:xbrli="http://www.xbrl.org/2003/instance"
+  xmlns:gl-cor="http://www.xbrl.org/int/gl/cor/2006-10-25"
+  xmlns:gl-bus="http://www.xbrl.org/int/gl/bus/2006-10-25"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+  <xbrli:context id="context-1">
+    <xbrli:entity>
+      <xbrli:identifier scheme="urn:synthetic:vkn">1111111111</xbrli:identifier>
+    </xbrli:entity>
+    <gl-cor:uniqueID>SYNTHETIC-ETTN-JOURNAL-001</gl-cor:uniqueID>
+  </xbrli:context>
+
+  <gl-cor:entriesType>journal</gl-cor:entriesType>
+  <gl-bus:numberOfEntries>2</gl-bus:numberOfEntries>
+  <gl-bus:fiscalYearStart>2026-01-01</gl-bus:fiscalYearStart>
+  <gl-bus:fiscalYearEnd>2026-12-31</gl-bus:fiscalYearEnd>
+
+  <gl-bus:organizationIdentifiers>
+    <gl-bus:organizationDescription>Kurum Unvanı</gl-bus:organizationDescription>
+    <gl-bus:organizationIdentifier>Sentetik Teknoloji A.Ş.</gl-bus:organizationIdentifier>
+  </gl-bus:organizationIdentifiers>
+  <gl-bus:organizationIdentifiers>
+    <gl-bus:organizationDescription>Şube Adı</gl-bus:organizationDescription>
+    <gl-bus:organizationIdentifier>Merkez</gl-bus:organizationIdentifier>
+  </gl-bus:organizationIdentifiers>
+  <gl-bus:phoneNumber>+90 000 000 00 00</gl-bus:phoneNumber>
+  <gl-bus:entityEmailAddress>synthetic@example.invalid</gl-bus:entityEmailAddress>
+
+  <gl-bus:accountantInformation>
+    <gl-bus:accountantName>Sentetik Mali Müşavir</gl-bus:accountantName>
+    <gl-bus:accountantContactPhoneNumber>+90 000 000 00 01</gl-bus:accountantContactPhoneNumber>
+    <gl-bus:accountantContactEmailAddress>accountant@example.invalid</gl-bus:accountantContactEmailAddress>
+    <gl-bus:accountantEngagementTypeDescription>SYNTHETIC-CONTRACT-001</gl-bus:accountantEngagementTypeDescription>
+  </gl-bus:accountantInformation>
+
+  <gl-cor:documentInfo>
+    <gl-cor:periodCoveredStart>2026-09-01</gl-cor:periodCoveredStart>
+    <gl-cor:periodCoveredEnd>2026-09-30</gl-cor:periodCoveredEnd>
+    <gl-cor:creationDate>2026-10-01</gl-cor:creationDate>
+    <gl-cor:uniqueID>SYNTHETIC-JOURNAL-2026-09</gl-cor:uniqueID>
+    <gl-bus:creator>Sentetik Uygulama</gl-bus:creator>
+    <gl-bus:sourceApplication>Fixture Generator</gl-bus:sourceApplication>
+    <gl-cor:entriesComment>Yalnızca otomatik test amacıyla üretilmiştir.</gl-cor:entriesComment>
+  </gl-cor:documentInfo>
+
+  <gl-cor:entryDetail>
+    <gl-cor:xbrlInclude>period_change</gl-cor:xbrlInclude>
+    <gl-cor:account>
+      <gl-cor:accountMainID>100</gl-cor:accountMainID>
+      <gl-cor:accountMainDescription>Kasa</gl-cor:accountMainDescription>
+    </gl-cor:account>
+    <gl-cor:amount>1500.25</gl-cor:amount>
+    <gl-cor:debitCreditCode>D</gl-cor:debitCreditCode>
+  </gl-cor:entryDetail>
+  <gl-cor:entryDetail>
+    <gl-cor:xbrlInclude>period_change</gl-cor:xbrlInclude>
+    <gl-cor:account>
+      <gl-cor:accountMainID>600</gl-cor:accountMainID>
+      <gl-cor:accountMainDescription>Yurt İçi Satışlar</gl-cor:accountMainDescription>
+    </gl-cor:account>
+    <gl-cor:amount>1500.25</gl-cor:amount>
+    <gl-cor:debitCreditCode>C</gl-cor:debitCreditCode>
+  </gl-cor:entryDetail>
+
+  <ds:Signature Id="main-signature">
+    <ds:SignedInfo>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+      <ds:Reference URI="">
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue>SYNTHETIC_MAIN_SIGNATURE_VALUE</ds:SignatureValue>
+    <ds:KeyInfo>
+      <ds:X509Data>
+        <ds:X509SubjectName>CN=SENTETIK MUKELLEF</ds:X509SubjectName>
+      </ds:X509Data>
+    </ds:KeyInfo>
+    <xades:QualifyingProperties>
+      <xades:SignedProperties>
+        <xades:SignedSignatureProperties>
+          <xades:SigningTime>2026-10-01T10:15:00+03:00</xades:SigningTime>
+        </xades:SignedSignatureProperties>
+      </xades:SignedProperties>
+      <xades:UnsignedProperties>
+        <xades:UnsignedSignatureProperties>
+          <xades:CounterSignature>
+            <ds:Signature Id="gib-counter-signature">
+              <ds:SignedInfo>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+              </ds:SignedInfo>
+              <ds:SignatureValue>SYNTHETIC_GIB_COUNTER_SIGNATURE_VALUE</ds:SignatureValue>
+              <ds:KeyInfo>
+                <ds:X509Data>
+                  <ds:X509SubjectName>CN=GELİR İDARESİ BAŞKANLIĞI TEST</ds:X509SubjectName>
+                  <ds:X509IssuerSerial>
+                    <ds:X509IssuerName>CN=SYNTHETIC TEST CA</ds:X509IssuerName>
+                    <ds:X509SerialNumber>0000000001</ds:X509SerialNumber>
+                  </ds:X509IssuerSerial>
+                </ds:X509Data>
+              </ds:KeyInfo>
+              <xades:SigningTime>2026-10-01T10:16:00+03:00</xades:SigningTime>
+            </ds:Signature>
+          </xades:CounterSignature>
+        </xades:UnsignedSignatureProperties>
+      </xades:UnsignedProperties>
+    </xades:QualifyingProperties>
+  </ds:Signature>
+</xbrli:xbrl>

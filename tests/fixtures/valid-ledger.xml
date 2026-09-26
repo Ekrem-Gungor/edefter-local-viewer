@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrli:xbrl
+  xmlns:xbrli="http://www.xbrl.org/2003/instance"
+  xmlns:gl-cor="http://www.xbrl.org/int/gl/cor/2006-10-25"
+  xmlns:gl-bus="http://www.xbrl.org/int/gl/bus/2006-10-25">
+  <xbrli:context id="context-1">
+    <xbrli:entity>
+      <xbrli:identifier scheme="urn:synthetic:vkn">2222222222</xbrli:identifier>
+    </xbrli:entity>
+    <gl-cor:uniqueID>SYNTHETIC-ETTN-LEDGER-001</gl-cor:uniqueID>
+  </xbrli:context>
+
+  <gl-cor:entriesType>ledger</gl-cor:entriesType>
+  <gl-bus:numberOfEntries>1</gl-bus:numberOfEntries>
+  <gl-bus:fiscalYearStart>2026-01-01</gl-bus:fiscalYearStart>
+  <gl-bus:fiscalYearEnd>2026-12-31</gl-bus:fiscalYearEnd>
+
+  <gl-bus:organizationIdentifiers>
+    <gl-bus:organizationDescription>Kurum Unvanı</gl-bus:organizationDescription>
+    <gl-bus:organizationIdentifier>Örnek Defter İşletmesi</gl-bus:organizationIdentifier>
+  </gl-bus:organizationIdentifiers>
+
+  <gl-cor:documentInfo>
+    <gl-cor:periodCoveredStart>2026-09-01</gl-cor:periodCoveredStart>
+    <gl-cor:periodCoveredEnd>2026-09-30</gl-cor:periodCoveredEnd>
+    <gl-cor:creationDate>2026-10-01</gl-cor:creationDate>
+    <gl-cor:uniqueID>SYNTHETIC-LEDGER-2026-09</gl-cor:uniqueID>
+    <gl-bus:creator>Sentetik Uygulama</gl-bus:creator>
+    <gl-bus:sourceApplication>Fixture Generator</gl-bus:sourceApplication>
+  </gl-cor:documentInfo>
+
+  <gl-cor:entryDetail>
+    <gl-cor:xbrlInclude>period_change</gl-cor:xbrlInclude>
+    <gl-cor:account>
+      <gl-cor:accountMainID>102</gl-cor:accountMainID>
+      <gl-cor:accountMainDescription>Bankalar</gl-cor:accountMainDescription>
+    </gl-cor:account>
+    <gl-cor:amount>2750.50</gl-cor:amount>
+    <gl-cor:debitCreditCode>D</gl-cor:debitCreditCode>
+  </gl-cor:entryDetail>
+</xbrli:xbrl>

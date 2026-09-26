@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<invoice xmlns="urn:synthetic:invoice">
+  <id>SYNTHETIC-INVOICE-001</id>
+  <customer>Sentetik Müşteri</customer>
+  <total>100.00</total>
+</invoice>

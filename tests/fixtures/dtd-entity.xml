@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xbrli:xbrl [
+  <!ENTITY external SYSTEM "https://example.invalid/synthetic-secret.txt">
+]>
+<xbrli:xbrl
+  xmlns:xbrli="http://www.xbrl.org/2003/instance"
+  xmlns:gl-cor="http://www.xbrl.org/int/gl/cor/2006-10-25">
+  <gl-cor:entriesType>&external;</gl-cor:entriesType>
+</xbrli:xbrl>
