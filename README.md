@@ -12,6 +12,18 @@ açılamayan e-Defter beyanlarını inceleyebilmek için bir iş günü içinde 
 çözümün; güvenli XML ayrıştırma, otomatik testler, kurumsal rapor arayüzü ve
 tekrar üretilebilir build hattıyla ürünleştirilmiş sürümüdür.
 
+## Ekran görüntüleri
+
+### Belge özeti ve taraf bilgileri
+
+![e-Defter Yerel Görüntüleyici belge özeti](docs/assets/edefter-local-viewer-overview.png)
+
+### Hesap toplamları ve imza metadata bilgileri
+
+![e-Defter Yerel Görüntüleyici hesap ve imza bilgileri](docs/assets/edefter-local-viewer-signatures.png)
+
+Görüntüler yalnızca sentetik test verileriyle oluşturulmuştur.
+
 ## Neden bu proje?
 
 e-Defter destek süreçlerinde bir berat dosyasının yalnızca görüntülenebilmesi
