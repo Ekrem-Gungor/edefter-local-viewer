@@ -1,0 +1,36 @@
+{
+  "name": "edefter-local-viewer",
+  "version": "0.1.0",
+  "description": "e-Defter berat XML dosyalarını herhangi bir sunucuya yüklemeden, doğrudan tarayıcı içinde görüntüleyen çevrimdışı bir araçtır.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ekrem-Gungor/edefter-local-viewer.git"
+  },
+  "keywords": [
+    "e-defter",
+    "xbrl",
+    "xml",
+    "offline-viewer"
+  ],
+  "author": "Ekrem Güngör",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Ekrem-Gungor/edefter-local-viewer/issues"
+  },
+  "homepage": "https://github.com/Ekrem-Gungor/edefter-local-viewer#readme",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^5.0.2",
+    "jsdom": "^30.1.1",
+    "vitest": "^5.0.2"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
+}
