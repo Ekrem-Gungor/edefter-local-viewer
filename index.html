@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="e-Defter berat XML dosyalarını tamamen tarayıcı içinde görüntüleyen çevrimdışı araç."
+    />
+    <title>e-Defter Yerel Görüntüleyici</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__content">
+        <div>
+          <p class="eyebrow">Çevrimdışı XML aracı</p>
+          <h1>e-Defter Yerel Görüntüleyici</h1>
+        </div>
+        <span class="privacy-badge">Veriler cihazınızdan çıkmaz</span>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="upload-card" aria-labelledby="upload-title">
+        <div>
+          <p class="eyebrow">Yerel dosya</p>
+          <h2 id="upload-title">Berat XML dosyanızı seçin</h2>
+          <p class="supporting-text">
+            Yevmiye ve büyük defter beratları desteklenir. Dosya yalnızca bu
+            tarayıcı sekmesinde işlenir.
+          </p>
+        </div>
+
+        <label class="file-picker" for="xml-file">
+          <span>XML dosyası seç</span>
+          <small>En fazla 10 MiB</small>
+        </label>
+        <input
+          id="xml-file"
+          class="visually-hidden"
+          type="file"
+          accept=".xml,text/xml,application/xml"
+        />
+
+        <p id="status" class="status" data-tone="neutral" aria-live="polite">
+          Henüz bir dosya seçilmedi.
+        </p>
+      </section>
+
+      <section id="summary" class="summary" aria-labelledby="summary-title" hidden>
+        <div class="summary__heading">
+          <div>
+            <p class="eyebrow">Belge özeti</p>
+            <h2 id="summary-title">Okunan bilgiler</h2>
+          </div>
+          <span id="selected-file" class="file-name"></span>
+        </div>
+
+        <dl class="summary-grid">
+          <div>
+            <dt>Defter türü</dt>
+            <dd id="document-type">-</dd>
+          </div>
+          <div>
+            <dt>Mükellef</dt>
+            <dd id="taxpayer-title">-</dd>
+          </div>
+          <div>
+            <dt>Dönem</dt>
+            <dd id="document-period">-</dd>
+          </div>
+          <div>
+            <dt>Hesap sayısı</dt>
+            <dd id="account-count">-</dd>
+          </div>
+        </dl>
+
+        <div class="notice" role="note">
+          <strong>İmza doğrulama kapsamı</strong>
+          <p id="signature-notice">
+            İmza alanları yalnızca XML içeriğinden okunur; kriptografik
+            doğrulama yapılmaz.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
