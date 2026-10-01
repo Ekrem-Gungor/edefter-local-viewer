@@ -9,9 +9,13 @@ const releaseFileName = "EDEFTER_GORUNTULE.html";
 const releaseFilePath = resolve(outputDirectory, releaseFileName);
 
 beforeAll(() => {
-  const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+  const npmCliPath = process.env.npm_execpath;
 
-  execFileSync(npmExecutable, ["run", "build"], {
+  if (!npmCliPath) {
+    throw new Error("npm CLI path could not be determined.");
+  }
+
+  execFileSync(process.execPath, [npmCliPath, "run", "build"], {
     cwd: projectRoot,
     encoding: "utf8",
     stdio: "pipe",
