@@ -38,17 +38,11 @@ describe("parseELedgerXml", () => {
   });
 
   it("rejects values that are not strings", () => {
-    expectXmlError(
-      () => parseELedgerXml(null),
-      XML_ERROR_CODES.invalidInput,
-    );
+    expectXmlError(() => parseELedgerXml(null), XML_ERROR_CODES.invalidInput);
   });
 
   it("rejects empty XML content", () => {
-    expectXmlError(
-      () => parseELedgerXml("   \n  "),
-      XML_ERROR_CODES.empty,
-    );
+    expectXmlError(() => parseELedgerXml("   \n  "), XML_ERROR_CODES.empty);
   });
 
   it("rejects XML exceeding the configured byte limit", () => {
@@ -59,7 +53,7 @@ describe("parseELedgerXml", () => {
   });
 
   it("uses a defensive default file size limit", () => {
-    expect(DEFAULT_MAX_XML_BYTES).toBe(10 * 1024 * 1024);
+    expect(DEFAULT_MAX_XML_BYTES).toBe(100 * 1024 * 1024);
   });
 
   it("rejects DTD and external entity declarations before parsing", () => {

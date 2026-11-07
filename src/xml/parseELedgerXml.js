@@ -1,13 +1,8 @@
-import {
-  ELedgerXmlError,
-  XML_ERROR_CODES,
-} from "./ELedgerXmlError.js";
-import {
-  SUPPORTED_DOCUMENT_TYPES,
-  XML_NAMESPACES,
-} from "./namespaces.js";
+import { ELedgerXmlError, XML_ERROR_CODES } from "./ELedgerXmlError.js";
+import { SUPPORTED_DOCUMENT_TYPES } from "./namespaces.js";
+import { ledgerStructure } from "./ledgerStructure.js";
 
-export const DEFAULT_MAX_XML_BYTES = 10 * 1024 * 1024;
+export const DEFAULT_MAX_XML_BYTES = 100 * 1024 * 1024;
 
 const forbiddenXmlDeclarationPattern = /<!\s*(?:DOCTYPE|ENTITY)\b/i;
 
@@ -29,12 +24,6 @@ function validateMaximumSize(maxBytes) {
   }
 }
 
-function getDocumentType(document) {
-  return document
-    .getElementsByTagNameNS(XML_NAMESPACES.glCore, "entriesType")[0]
-    ?.textContent?.trim();
-}
-
 export function parseELedgerXml(
   xmlSource,
   { maxBytes = DEFAULT_MAX_XML_BYTES } = {},
@@ -49,10 +38,7 @@ export function parseELedgerXml(
   }
 
   if (xmlSource.trim().length === 0) {
-    throw createXmlError(
-      XML_ERROR_CODES.empty,
-      "XML dosyası boş olamaz.",
-    );
+    throw createXmlError(XML_ERROR_CODES.empty, "XML dosyası boş olamaz.");
   }
 
   const sizeBytes = getUtf8ByteLength(xmlSource);
@@ -85,24 +71,20 @@ export function parseELedgerXml(
     );
   }
 
-  const root = document.documentElement;
-
-  if (
-    root.localName !== "xbrl" ||
-    root.namespaceURI !== XML_NAMESPACES.xbrlInstance
-  ) {
+  const structure = ledgerStructure(document);
+  if (!structure) {
     throw createXmlError(
       XML_ERROR_CODES.unsupportedRoot,
-      "Seçilen dosya desteklenen bir e-Defter XBRL belgesi değil.",
+      "Seçilen dosyada desteklenen defter, berat veya XBRL yapısı bulunamadı.",
     );
   }
 
-  const documentType = getDocumentType(document);
+  const documentType = structure.documentType;
 
   if (!SUPPORTED_DOCUMENT_TYPES.includes(documentType)) {
     throw createXmlError(
       XML_ERROR_CODES.unsupportedDocumentType,
-      "XML belge türü desteklenmiyor. Yevmiye veya büyük defter beratı seçin.",
+      "XML belge türü desteklenmiyor. Yevmiye veya büyük defter XML dosyası seçin.",
     );
   }
 
@@ -110,5 +92,6 @@ export function parseELedgerXml(
     document,
     documentType,
     sizeBytes,
+    kind: structure.kind,
   });
 }

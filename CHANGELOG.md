@@ -8,6 +8,33 @@ izler.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-07
+
+### Eklendi
+
+- Gerçek yevmiye/büyük defter XML'leri ve e-Defter kök sarmalayıcıları.
+- Çoklu XML/ZIP yükleme, belge listesi, hareket arama ve sayfalama.
+- CSV aktarımı, kaynak XML önizlemesi ve özgün XML indirme.
+- XML 100 MiB, ZIP 150 MiB, toplam XML 300 MiB ve 500 belge sınırları.
+- Gerçek açılan ZIP boyutuna uygulanan akış sınırı.
+
+### Düzeltildi
+
+- Yazdırmada sayfaya sığan bilgi kartlarının, tablo satırlarının ve imza bloklarının birlikte tutulması.
+- Yazdırmada grid ve taşma kurallarının kaldırılması; uzun tabloların başlıkları tekrarlanarak devam etmesi.
+- Kaynak XML bölümünün başlığı dahil tamamının baskıdan gizlenmesi.
+
+- Yazdırmanın seçili belgenin tüm hareketlerini içermesi ve arama/sayfanın geri yüklenmesi.
+- Hareket tarih/fiş bilgilerinin üst kayıttan güvenli devralınması.
+- Aynı adlı değişmiş belgenin güncellenmesi, hatalı güncellemede eski belgenin korunması.
+- Berat özet toplamlarının yalnızca period_change kayıtlarından alınması.
+- Paket sürümünün 1.1.0 olarak dokümantasyonla eşitlenmesi.
+
+### Değişti
+
+- Kaynak kod XML, veri çıkarımı, içe aktarma, arayüz, uygulama ve dışa aktarma katmanlarına ayrıldı.
+- Geliştirme için en düşük Node.js sürümü 22.22.2 oldu.
+
 ## [1.0.0] - 2026-09-26
 
 ### Eklendi
@@ -37,5 +64,6 @@ izler.
   doğrulama yapılmaz.
 - Araç resmi GİB doğrulaması veya hukuki geçerlilik sonucu üretmez.
 
-[Unreleased]: https://github.com/Ekrem-Gungor/edefter-local-viewer/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Ekrem-Gungor/edefter-local-viewer/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Ekrem-Gungor/edefter-local-viewer/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Ekrem-Gungor/edefter-local-viewer/releases/tag/v1.0.0

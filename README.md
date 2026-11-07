@@ -2,162 +2,115 @@
 
 [![CI](https://github.com/Ekrem-Gungor/edefter-local-viewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Ekrem-Gungor/edefter-local-viewer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1f4b72.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-356e4a.svg)](package.json)
 
-e-Defter berat XML dosyalarını herhangi bir sunucuya yüklemeden, doğrudan
-tarayıcı içinde görüntüleyen çevrimdışı bir araçtır.
+Yevmiye ve büyük defter XML dosyalarını, beratları ve ZIP arşivlerini herhangi
+bir sunucuya yüklemeden tarayıcı içinde inceleyen çevrimdışı araçtır.
 
-Proje, gerçek bir müşteri ortamında standart görüntüleme bağımlılığı nedeniyle
-açılamayan e-Defter beyanlarını inceleyebilmek için bir iş günü içinde geliştirilen
-çözümün; güvenli XML ayrıştırma, otomatik testler, kurumsal rapor arayüzü ve
-tekrar üretilebilir build hattıyla ürünleştirilmiş sürümüdür.
-
-## Ekran görüntüleri
-
-### Belge özeti ve taraf bilgileri
-
-![e-Defter Yerel Görüntüleyici belge özeti](docs/assets/edefter-local-viewer-overview.png)
-
-### Hesap toplamları ve imza metadata bilgileri
-
-![e-Defter Yerel Görüntüleyici hesap ve imza bilgileri](docs/assets/edefter-local-viewer-signatures.png)
-
-Görüntüler yalnızca sentetik test verileriyle oluşturulmuştur.
-
-## Neden bu proje?
-
-e-Defter destek süreçlerinde bir berat dosyasının yalnızca görüntülenebilmesi
-için ek dosyalara, masaüstü uygulamalarına veya üçüncü taraf sistemlere bağımlı
-kalınabilir. Bu araç, inceleme ihtiyacını tek bir HTML dosyasıyla ve tamamen
-yerel işlem modeliyle karşılar.
-
-- Kurulum gerektirmez.
-- Sunucu veya veritabanı kullanmaz.
-- İnternet bağlantısına ihtiyaç duymaz.
-- Seçilen XML dosyasını cihaz dışına göndermez.
-- Güncel bir masaüstü tarayıcıda çalışır.
-
-## Özellikler
-
-- Yevmiye ve büyük defter berat XML desteği
-- Sürükle-bırak veya dosya seçiciyle yerel dosya açma
-- Mükellef, meslek mensubu ve doküman bilgileri
-- Hesap bazında borç ve alacak toplamları
-- Belge imzası ve karşı imza metadata görünümü
-- Sade, kurumsal ve yazdırmaya uygun rapor arayüzü
-- Anlaşılır hata ve durum mesajları
-- Tek HTML dosyalık çevrimdışı dağıtım
-- Sentetik fixture'larla otomatik parser, extractor, arayüz ve build testleri
-
-## Hızlı kullanım
+## Kullanım
 
 1. [Releases](https://github.com/Ekrem-Gungor/edefter-local-viewer/releases)
    sayfasından `EDEFTER_GORUNTULE.html` dosyasını indirin.
-2. Dosyayı güncel Microsoft Edge, Google Chrome veya Firefox ile açın.
-3. İncelenecek `.xml` dosyasını seçin veya dosya alanına sürükleyin.
-4. Oluşturulan raporu inceleyin ya da tarayıcı üzerinden yazdırın.
+2. Güncel Microsoft Edge, Google Chrome veya Firefox ile açın.
+3. Bir veya birden fazla `.xml` / `.zip` dosyası seçin ya da sürükleyin.
+4. Soldaki listeden belgeyi seçin; hareketleri arayın, CSV indirin veya yazdırın.
 
-Uygulamanın çalışması için Node.js gerekmez. Node.js yalnızca kaynak koddan
-test ve build almak isteyen geliştiriciler için kullanılır.
+Kurulum, internet bağlantısı, kullanıcı hesabı, sunucu veya veritabanı gerekmez.
+Node.js yalnızca geliştiricilerin test ve build alması için gereklidir.
 
-## Gizlilik ve güvenlik yaklaşımı
+## Özellikler
 
-Dosya işleme işlemi kullanıcının tarayıcısında gerçekleşir. Uygulamada harici
-API çağrısı, analiz servisi, izleme betiği veya dosya yükleme mekanizması
-bulunmaz.
+- Yevmiye (Y), büyük defter (K), yevmiye beratı (YB), büyük defter beratı (KB).
+- `edefter:defter`, `edefter:berat` ve doğrudan XBRL yapıları.
+- Belge türünün dosya adı yerine XML içeriğinden belirlenmesi.
+- Mükellef, meslek mensubu, belge ve dönem bilgileri.
+- Hesap bazında borç/alacak toplamları ve hareket satırları.
+- Berat özet toplamları ile tam defter hareketlerinin ayrı açıklanması.
+- Çoklu dosya ve ZIP içindeki klasörlerden XML yükleme.
+- Türkçe arama, 60 satırlık sayfalama, tüm hareketleri içeren CSV.
+- Arama ve sayfalamadan bağımsız olarak seçili belgenin tüm hareketlerini yazdırma.
+- Aynı adlı dosyada aynı içerik varsa atlama, içerik değişmişse mevcut belgeyi güncelleme.
+- Kaynak XML önizlemesi ve özgün XML baytlarını değiştirmeden indirme.
+- Belge imzası, karşı imza ve varsa ayrı defter imza değeri bilgileri.
+- Tek HTML dosyasında çevrimdışı dağıtım.
 
-XML dosyaları güvenilmeyen girdi olarak değerlendirilir:
+## v1.0.0 ekran görüntüleri
 
-- DTD ve entity tanımları reddedilir.
-- Dosya boyutu, okunmadan önce 10 MiB ile sınırlandırılır.
-- XBRL kök elementi ve namespace doğrulanır.
-- Yalnızca `journal` ve `ledger` belge türleri kabul edilir.
-- XML kaynaklı değerler `innerHTML` yerine güvenli DOM API'leriyle gösterilir.
-- Testlerde gerçek müşteri verisi yerine sentetik XML örnekleri kullanılır.
+![Belge ve hareket inceleme](docs/assets/edefter-local-viewer-overview.png)
+![Elektronik imza bilgileri](docs/assets/edefter-local-viewer-signatures.png)
 
-Gerçek müşteri belgeleri depoya, issue içeriklerine, loglara veya ekran
-görüntülerine eklenmemelidir.
+Görüntüler önceki arayüze aittir ve sentetik test verileriyle hazırlanmıştır.
+v1.1.0 belge listesi, hareket tablosu ve dışa aktarma kontrolleri ekler.
 
-## Önemli doğrulama sınırı
+## Sınırlar
 
-Bu araç XML içindeki imza ve karşı imza metadata alanlarını yalnızca görüntüler.
+| Sınır                                             | Değer               |
+| ------------------------------------------------- | ------------------- |
+| XML dosyası                                       | 100 MiB             |
+| ZIP arşivi                                        | 150 MiB             |
+| Yüklenen toplam XML verisi                        | 300 MiB             |
+| Oturumdaki belge sayısı / bir ZIP'teki XML sayısı | 500                 |
+| Kaynak XML önizlemesi                             | İlk 80.000 karakter |
 
-Araç:
+UTF-8 kodlaması desteklenir. ZIP içindeki XML dosyaları sırayla açılır;
+açılmış gerçek veri boyutu da sınırlandırılır. Hatalı dosyalar ayrı listelenir,
+diğer belgeler işlenmeye devam eder. İç içe ZIP arşivleri açılmaz.
 
-- elektronik imzayı kriptografik olarak doğrulamaz,
-- sertifika zinciri veya sertifika geçerliliği kontrolü yapmaz,
-- belge bütünlüğü ya da hukuki geçerlilik sonucu üretmez,
-- GİB doğrulama servisinin yerine geçmez.
+Aynı ad ve ZIP yolu yeniden yüklendiğinde son geçerli içerik kullanılır.
+Geçersiz bir güncelleme önceki belgeyi silmez. Farklı ZIP klasörlerindeki aynı
+adlı belgeler ayrı tutulur.
 
-Arayüzde görülen “imza bulundu” ifadesi, yalnızca ilgili metadata alanlarının
-XML içinde mevcut olduğunu belirtir; imzanın doğrulandığı anlamına gelmez.
+Büyük belgelerin ayrıştırılması, arama veya tüm hareketlerin yazdırmaya
+hazırlanması cihazın işlemci ve belleğine bağlı olarak zaman alabilir.
 
-## Kaynak koddan çalıştırma
+CSV aramadan bağımsız olarak seçili belgenin tüm hareketlerini içerir;
+UTF-8 BOM, noktalı virgül ayırıcı ve noktalı ondalık biçimi kullanır.
 
-Gereksinimler:
+## Gizlilik ve doğrulama kapsamı
 
-- Node.js 22 veya üzeri
-- npm
+- Dosyalar cihaz dışına gönderilmez; harici API, analiz veya izleme servisi yoktur.
+- ZIP kütüphanesi HTML içine gömülüdür; CDN veya internet erişimi gerekmez.
+- DTD ve entity bildirimleri reddedilir, XML kökü ve belge türü kontrol edilir.
+- XML kaynaklı metinler güvenli DOM API'leriyle gösterilir.
+- Gerçek müşteri belgeleri depoya, issue'lara veya ekran görüntülerine eklenmemelidir.
+
+Araç elektronik imzayı, sertifika zincirini, zaman damgasını, belge bütünlüğünü
+veya hukuki geçerliliği doğrulamaz. GİB adına karşı imza bilgisi bulunması bir
+onay sonucu değildir. Tam XML şema doğrulaması yapılmaz.
+
+## Geliştirme
+
+Node.js **22.22.2 veya üzeri** kullanın.
 
 ```bash
 npm ci
-npm test
-```
-
-Geliştirme sunucusu:
-
-```bash
-npm run dev
-```
-
-Coverage raporu:
-
-```bash
 npm run test:coverage
-```
-
-Tek dosyalık production build:
-
-```bash
 npm run build
 ```
 
-Build sonucu:
-
-```text
-dist/EDEFTER_GORUNTULE.html
-```
+Geliştirme: `npm run dev`. Production çıktısı: `dist/EDEFTER_GORUNTULE.html`.
 
 ## Proje yapısı
 
-```text
-src/
-├── parser/       XML belgesinden görüntüleme modelini çıkarır
-├── ui/           Verileri güvenli DOM işlemleriyle rapora dönüştürür
-├── xml/          XML güvenlik ve belge türü kontrollerini yürütür
-├── main.js       Dosya seçimi ve kullanıcı akışını yönetir
-└── styles.css    Ekran ve yazdırma stillerini içerir
-
-scripts/          Tek HTML dosyalık build işlemi
-tests/            Sentetik fixture ve otomatik testler
-docs/             Kapsam, mimari ve release dokümantasyonu
-```
+| Dizin        | Sorumluluk                                            |
+| ------------ | ----------------------------------------------------- |
+| `src/xml`    | XML güvenlik, kök ve belge türü kontrolleri           |
+| `src/parser` | Taraflar, hareketler, hesaplar ve imza bilgileri      |
+| `src/import` | Çoklu XML/ZIP okuma, boyut sınırları ve güncelleme    |
+| `src/ui`     | Güvenli DOM işlemleriyle rapor ve hareket tablosu     |
+| `src/app`    | Seçim, arama, sayfalama ve yazdırma yaşam döngüsü     |
+| `src/export` | CSV ve özgün XML indirme                              |
+| `scripts`    | Tek dosyalık build                                    |
+| `tests`      | Sentetik XML, ZIP, uygulama, arayüz ve build testleri |
 
 ## Dokümantasyon
 
-- [Ürün kapsamı](docs/product-scope.md)
 - [Mimari](docs/architecture.md)
-- [v1.0.0 release notları](docs/release-notes-v1.0.0.md)
-- [Release kontrol listesi](docs/release-checklist.md)
-- [Güvenlik politikası](SECURITY.md)
+- [Ürün kapsamı](docs/product-scope.md)
+- [v1.1.0 sürüm notları](docs/release-notes-v1.1.0.md)
+- [Yayın kontrol listesi](docs/release-checklist.md)
 - [Değişiklik günlüğü](CHANGELOG.md)
+- [Güvenlik politikası](SECURITY.md)
 
-## Proje durumu
-
-v1.0.0 kapsamındaki güvenli XML ayrıştırma, veri çıkarımı, kurumsal rapor
-arayüzü, otomatik testler, CI ve tek dosyalık build hattı tamamlandı. Proje ilk
-kararlı GitHub Release yayınına hazırlanmaktadır.
-
-## Lisans
-
-Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
+v1.1.0 kaynak hazırlığı yeni sürüm içindir; GitHub Release yayını ayrı bir adımdır.
+Proje [MIT Lisansı](LICENSE) ile sunulur. Gömülü ZIP bağımlılıklarının bildirimleri
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) ve dağıtım HTML'sinde yer alır.
