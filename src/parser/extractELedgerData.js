@@ -1,4 +1,6 @@
 import { XML_NAMESPACES } from "../xml/namespaces.js";
+import { ledgerStructure, childText } from "../xml/ledgerStructure.js";
+import { extractMovements, aggregateAccounts } from "./extractMovements.js";
 
 const documentTypeLabels = Object.freeze({
   journal: "Yevmiye Defteri",
@@ -40,11 +42,8 @@ function getOrganizationIdentifier(document, description) {
     "organizationIdentifiers",
   ).find(
     (element) =>
-      getText(
-        element,
-        XML_NAMESPACES.glBusiness,
-        "organizationDescription",
-      ) === description,
+      getText(element, XML_NAMESPACES.glBusiness, "organizationDescription") ===
+      description,
   );
 
   return getText(
@@ -72,10 +71,7 @@ function isWithinElement(element, namespace, localName) {
   let current = element.parentElement;
 
   while (current) {
-    if (
-      current.namespaceURI === namespace &&
-      current.localName === localName
-    ) {
+    if (current.namespaceURI === namespace && current.localName === localName) {
       return true;
     }
 
@@ -109,7 +105,9 @@ function getOwnedElement(signature, namespace, localName) {
 }
 
 function getOwnedText(signature, namespace, localName) {
-  return getOwnedElement(signature, namespace, localName)?.textContent?.trim() ?? "";
+  return (
+    getOwnedElement(signature, namespace, localName)?.textContent?.trim() ?? ""
+  );
 }
 
 function extractSignatureMetadata(signature) {
@@ -139,13 +137,9 @@ function extractSignatureMetadata(signature) {
   );
 
   return {
-    present: Boolean(subject || value),
+    present: true,
     subject,
-    signingTime: getOwnedText(
-      signature,
-      XML_NAMESPACES.xades,
-      "SigningTime",
-    ),
+    signingTime: getOwnedText(signature, XML_NAMESPACES.xades, "SigningTime"),
     value,
     signatureAlgorithm: signatureMethod?.getAttribute("Algorithm") ?? "",
     digestAlgorithm: digestMethod?.getAttribute("Algorithm") ?? "",
@@ -171,11 +165,7 @@ function extractSignatures(document) {
   );
   const primarySignature = signatures.find(
     (signature) =>
-      !isWithinElement(
-        signature,
-        XML_NAMESPACES.xades,
-        "CounterSignature",
-      ),
+      !isWithinElement(signature, XML_NAMESPACES.xades, "CounterSignature"),
   );
   const counterSignatureContainer = getFirstElement(
     document,
@@ -193,7 +183,7 @@ function extractSignatures(document) {
     primary: extractSignatureMetadata(primarySignature),
     counterSignature: {
       ...counterSignatureMetadata,
-      claimedAuthority: /GELİR İDARESİ BAŞKANLIĞI/i.test(
+      claimedAuthority: /GELİR\s+İDARESİ\s+BAŞKANLIĞI/i.test(
         counterSignatureMetadata.subject,
       )
         ? "GIB"
@@ -202,92 +192,40 @@ function extractSignatures(document) {
   };
 }
 
-function extractAccounts(document) {
-  const accounts = new Map();
-
-  getElements(document, XML_NAMESPACES.glCore, "entryDetail")
-    .filter(
-      (detail) =>
-        getText(detail, XML_NAMESPACES.glCore, "xbrlInclude") ===
-        "period_change",
-    )
-    .forEach((detail) => {
-      const account = getFirstElement(
-        detail,
-        XML_NAMESPACES.glCore,
-        "account",
-      );
-      const code = getText(
-        account,
-        XML_NAMESPACES.glCore,
-        "accountMainID",
-      );
-
-      if (!code) {
-        return;
-      }
-
-      const current = accounts.get(code) ?? {
-        code,
-        description: getText(
-          account,
-          XML_NAMESPACES.glCore,
-          "accountMainDescription",
-        ),
-        debit: 0,
-        credit: 0,
-      };
-      const amount = Number(
-        getText(detail, XML_NAMESPACES.glCore, "amount"),
-      );
-      const debitCreditCode = getText(
-        detail,
-        XML_NAMESPACES.glCore,
-        "debitCreditCode",
-      );
-
-      if (Number.isFinite(amount)) {
-        if (debitCreditCode === "D") {
-          current.debit += amount;
-        } else if (debitCreditCode === "C") {
-          current.credit += amount;
-        }
-      }
-
-      accounts.set(code, current);
-    });
-
-  return [...accounts.values()];
-}
-
 export function extractELedgerData(document) {
-  const documentType = getText(
-    document,
-    XML_NAMESPACES.glCore,
-    "entriesType",
-  );
-  const documentInfo = getFirstElement(
-    document,
-    XML_NAMESPACES.glCore,
-    "documentInfo",
-  );
-  const context = getFirstElement(
-    document,
-    XML_NAMESPACES.xbrlInstance,
-    "context",
+  const structure = ledgerStructure(document);
+  if (!structure) throw new Error("Desteklenen XML yapısı bulunamadı.");
+  const {
+    root,
+    xbrl,
+    accounting,
+    info: documentInfo,
+    documentType,
+    kind,
+  } = structure;
+  const context = getFirstElement(xbrl, XML_NAMESPACES.xbrlInstance, "context");
+  const rows = extractMovements(accounting);
+  const accounts = aggregateAccounts(rows, kind);
+  const signatures = extractSignatures(document);
+  signatures.detached = childText(
+    root,
+    XML_NAMESPACES.xmlSignature,
+    "SignatureValue",
   );
   const accountant = getFirstElement(
-    document,
+    accounting,
     XML_NAMESPACES.glBusiness,
     "accountantInformation",
   );
   const identifier = getText(
-    document,
+    context,
     XML_NAMESPACES.xbrlInstance,
     "identifier",
   );
 
   return {
+    kind,
+    rows,
     documentType,
     documentTypeLabel: documentTypeLabels[documentType] ?? "Belge",
     taxpayer: {
@@ -295,30 +233,20 @@ export function extractELedgerData(document) {
       identifierType: getIdentifierType(identifier),
       title:
         getOrganizationIdentifier(document, "Kurum Unvanı") ||
-        getOrganizationIdentifier(document, "Adı Soyadı"),
+        getOrganizationIdentifier(document, "Adı Soyadı") ||
+        getOrganizationIdentifier(document, "Ticaret Unvanı") ||
+        getOrganizationIdentifier(document, "Unvanı"),
       branch: getOrganizationIdentifier(document, "Şube Adı"),
-      phone: getText(
-        document,
-        XML_NAMESPACES.glBusiness,
-        "phoneNumber",
-      ),
-      fax: getText(
-        document,
-        XML_NAMESPACES.glBusiness,
-        "entityFaxNumber",
-      ),
+      phone: getText(accounting, XML_NAMESPACES.glBusiness, "phoneNumber"),
+      fax: getText(accounting, XML_NAMESPACES.glBusiness, "entityFaxNumber"),
       email: getText(
-        document,
+        accounting,
         XML_NAMESPACES.glBusiness,
         "entityEmailAddress",
       ),
     },
     accountant: {
-      name: getText(
-        accountant,
-        XML_NAMESPACES.glBusiness,
-        "accountantName",
-      ),
+      name: getText(accountant, XML_NAMESPACES.glBusiness, "accountantName"),
       phone: getText(
         accountant,
         XML_NAMESPACES.glBusiness,
@@ -341,6 +269,8 @@ export function extractELedgerData(document) {
       ),
     },
     document: {
+      headerCount: getElements(accounting, XML_NAMESPACES.glCore, "entryHeader")
+        .length,
       periodStart: getText(
         documentInfo,
         XML_NAMESPACES.glCore,
@@ -351,21 +281,13 @@ export function extractELedgerData(document) {
         XML_NAMESPACES.glCore,
         "periodCoveredEnd",
       ),
-      uniqueId: getText(
-        documentInfo,
-        XML_NAMESPACES.glCore,
-        "uniqueID",
-      ),
+      uniqueId: getText(documentInfo, XML_NAMESPACES.glCore, "uniqueID"),
       creationDate: getText(
         documentInfo,
         XML_NAMESPACES.glCore,
         "creationDate",
       ),
-      creator: getText(
-        documentInfo,
-        XML_NAMESPACES.glBusiness,
-        "creator",
-      ),
+      creator: getText(documentInfo, XML_NAMESPACES.glBusiness, "creator"),
       sourceApplication: getText(
         documentInfo,
         XML_NAMESPACES.glBusiness,
@@ -377,23 +299,28 @@ export function extractELedgerData(document) {
         "entriesComment",
       ),
       fiscalYearStart: getText(
-        document,
+        accounting,
         XML_NAMESPACES.glBusiness,
         "fiscalYearStart",
       ),
       fiscalYearEnd: getText(
-        document,
+        accounting,
         XML_NAMESPACES.glBusiness,
         "fiscalYearEnd",
       ),
       ettn: getText(context, XML_NAMESPACES.glCore, "uniqueID"),
-      numberOfEntries: getText(
-        document,
-        XML_NAMESPACES.glBusiness,
-        "numberOfEntries",
-      ),
+      numberOfEntries:
+        getText(context, XML_NAMESPACES.glBusiness, "numberOfEntries") ||
+        getText(accounting, XML_NAMESPACES.glBusiness, "numberOfEntries"),
     },
-    accounts: extractAccounts(document),
-    signatures: extractSignatures(document),
+    accounts,
+    signatures,
+    total: accounts.reduce(
+      (sum, account) => ({
+        debit: sum.debit + account.debit,
+        credit: sum.credit + account.credit,
+      }),
+      { debit: 0, credit: 0 },
+    ),
   };
 }

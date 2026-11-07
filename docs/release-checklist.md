@@ -1,4 +1,4 @@
-# v1.0.0 Release Kontrol Listesi
+# v1.1.0 Release Kontrol Listesi
 
 ## Kaynak kod
 
@@ -21,10 +21,20 @@
 - [ ] Sentetik büyük defter XML'i doğru görüntüleniyor.
 - [ ] Sürükle-bırak ve dosya seçici çalışıyor.
 - [ ] Hatalı, boş ve desteklenmeyen XML için anlaşılır hata gösteriliyor.
-- [ ] 10 MiB üzerindeki dosya reddediliyor.
+- [ ] 100 MiB üzerindeki dosya reddediliyor.
 - [ ] Temizle ve Yazdır işlemleri çalışıyor.
 - [ ] Dar ekran ve yazdırma görünümü kontrol edildi.
+- [ ] A4 / %100 ölçekte bilgi kartları ve imza blokları gereksiz bölünmüyor.
+- [ ] Uzun tablolarda satırlar korunuyor ve sütun başlıkları tekrarlanıyor.
+- [ ] Kaynak XML başlığı baskıda görünmüyor; üstbilgi/altbilgi kapalı denendi.
 - [ ] Tarayıcı geliştirici araçlarında harici ağ isteği görülmüyor.
+
+- [ ] ZIP arşivinde geçerli ve hatalı belgeler birlikte denendi.
+- [ ] Aynı adlı değişen dosya güncellendi, hatalı güncellemede önceki belge korundu.
+- [ ] 60 satırdan uzun belge arama açıkken tüm satırlarıyla yazdırıldı.
+- [ ] CSV tüm satırları ve üst kayıttan alınan tarih/fiş bilgilerini içeriyor.
+- [ ] İndirilen özgün XML byte karşılaştırması başarılı.
+- [ ] Toplam veri, ZIP ve belge sayısı sınırları doğrulandı.
 
 ## Dokümantasyon
 
@@ -40,7 +50,7 @@
 - [ ] `main` üzerinde son CI başarılı.
 - [ ] Temiz `main` üzerinden production build alındı.
 - [ ] `EDEFTER_GORUNTULE.html` için SHA-256 özeti oluşturuldu.
-- [ ] Annotated `v1.0.0` etiketi oluşturuldu ve push edildi.
+- [ ] Annotated `v1.1.0` etiketi oluşturuldu ve push edildi.
 - [ ] GitHub Release oluşturuldu.
 - [ ] HTML dosyası release eki olarak yüklendi.
 - [ ] SHA-256 özeti release açıklamasına eklendi.

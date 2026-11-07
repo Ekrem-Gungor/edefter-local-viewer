@@ -2,7 +2,7 @@
 
 ## Desteklenen sürümler
 
-Proje kararlı bir sürüme ulaşana kadar yalnızca varsayılan daldaki en güncel kod için güvenlik düzeltmesi sağlanır. İlk kararlı sürümden sonra desteklenen sürümler bu belgede ayrıca listelenecektir.
+Güvenlik düzeltmeleri varsayılan daldaki güncel kod üzerinde sağlanır. v1.1.0 hazırlığında güncel kaynak kullanın; eski dağıtım HTML dosyaları otomatik güncellenmez.
 
 ## Güvenlik açığı bildirimi
 
@@ -35,3 +35,11 @@ Testlerde yalnızca sentetik veya geri döndürülemeyecek şekilde anonimleşti
 ## Güvenlik sınırı
 
 Uygulama XML içindeki imza alanlarını görüntüler; kriptografik imza doğrulaması yapmaz. Görüntülenen bir karşı imzanın varlığı belgenin geçerli, değiştirilmemiş veya resmi olarak onaylanmış olduğunu tek başına kanıtlamaz.
+
+## v1.1.0 içe aktarma sınırları
+
+XML dosyası 100 MiB, ZIP dosyası 150 MiB, toplam XML verisi 300 MiB ve oturum
+500 belge ile sınırlıdır. ZIP başlık bilgisine ek olarak açılan gerçek byte
+sayısı da kontrol edilir. İçe aktarma sırayla yürütülür. İç içe arşivler açılmaz.
+Dosyalar UTF-8 olarak okunur. CSV'de formül başlangıcına benzeyen metinler
+etkisizleştirilir. Orijinal XML indirme özgün byte dizisini kullanır.

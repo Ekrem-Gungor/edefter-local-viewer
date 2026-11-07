@@ -1,10 +1,4 @@
-import {
-  access,
-  readFile,
-  readdir,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { access, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,6 +87,14 @@ async function buildSingleFile() {
   html = await inlineStyles(html);
   html = await inlineScripts(html);
 
+  const notices = await readFile(
+    resolve(projectRoot, "THIRD_PARTY_NOTICES.md"),
+    "utf8",
+  );
+  html = html.replace(
+    "</body>",
+    `<!--\n${notices.replaceAll("-->", "-- >")}\n-->\n</body>`,
+  );
   assertSelfContained(html);
 
   await writeFile(releaseHtmlPath, html, "utf8");
